@@ -28,6 +28,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/user/me").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/admin/panel").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/licenses/**").hasRole("ADMIN")
+                        .requestMatchers("/api/licenses/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
                 );
 
