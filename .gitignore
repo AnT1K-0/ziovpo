@@ -1,0 +1,107 @@
+############################
+# OS
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# Maven
+############################
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+############################
+# Gradle
+############################
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+############################
+# IntelliJ IDEA
+############################
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+############################
+# Eclipse / STS
+############################
+.classpath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+.apt_generated
+.factorypath
+
+############################
+# NetBeans
+############################
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+############################
+# VS Code
+############################
+.vscode/
+
+############################
+# Logs
+############################
+*.log
+
+############################
+# Env / Secrets
+############################
+.env
+.env.*
+*.env
+
+############################
+############################
+certs/private/
+certs/keystore/
+
+*.key
+*.p12
+*.pfx
+*.jks
+*.csr
+*.der
+
+keystore.b64.txt
+
+############################
+
+############################
+*.tar
+docker-compose.override.yml
+
+############################
+
+############################
+*.tmp
+*.swp
+*.bak
+
+certs/private/
+certs/keystore/
+
+*.key
+*.p12
+*.pfx
+*.jks
+*.csr
+*.der
+*.srl
+*.ext
+
+keystore.b64.txt
