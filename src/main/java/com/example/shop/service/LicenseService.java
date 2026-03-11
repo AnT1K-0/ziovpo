@@ -1,11 +1,6 @@
 package com.example.shop.service;
 
-import com.example.shop.controller.dto.CheckLicenseRequest;
-import com.example.shop.controller.dto.RenewLicenseRequest;
-import com.example.shop.controller.dto.ActivateLicenseRequest;
-import com.example.shop.controller.dto.CreateLicenseRequest;
-import com.example.shop.controller.dto.CreateLicenseResponse;
-import com.example.shop.controller.dto.LicenseTicketResponse;
+import com.example.shop.controller.dto.*;
 import com.example.shop.model.*;
 import com.example.shop.repository.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -13,12 +8,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.OffsetDateTime;
+import java.util.HexFormat;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class LicenseService {
+
+    private static final long TICKET_TTL_SECONDS = 300L;
 
     private final ProductRepository productRepository;
     private final LicenseTypeRepository licenseTypeRepository;
@@ -79,7 +79,7 @@ public class LicenseService {
     }
 
     @Transactional
-    public LicenseTicketResponse activateLicense(ActivateLicenseRequest request, Long userId) throws IllegalAccessException {
+    public TicketResponse activateLicense(ActivateLicenseRequest request, Long userId) throws IllegalAccessException {
         License license = licenseRepository.findByCode(request.activationKey())
                 .orElseThrow(() -> new EntityNotFoundException("License not found"));
 
@@ -118,7 +118,7 @@ public class LicenseService {
             createDeviceLicenseIfAbsent(license, device, now);
             saveHistory(license, user, LicenseHistoryStatus.ACTIVATED, "First activation");
 
-            return buildTicket(license);
+            return buildTicketResponse(license, device);
         }
 
         long currentDeviceCount = deviceLicenseRepository.countByLicense(license);
@@ -131,51 +131,11 @@ public class LicenseService {
         createDeviceLicenseIfAbsent(license, device, OffsetDateTime.now());
         saveHistory(license, user, LicenseHistoryStatus.ACTIVATED, "Additional device activation");
 
-        return buildTicket(license);
+        return buildTicketResponse(license, device);
     }
 
-    private void createDeviceLicenseIfAbsent(License license, Device device, OffsetDateTime activationTime) {
-        boolean exists = deviceLicenseRepository.existsByLicenseAndDevice(license, device);
-        if (!exists) {
-            DeviceLicense deviceLicense = new DeviceLicense();
-            deviceLicense.setLicense(license);
-            deviceLicense.setDevice(device);
-            deviceLicense.setActivationDate(activationTime);
-            deviceLicenseRepository.save(deviceLicense);
-        }
-    }
-
-    private void saveHistory(License license, UserAccount user, LicenseHistoryStatus status, String description) {
-        LicenseHistory history = new LicenseHistory();
-        history.setLicense(license);
-        history.setUser(user);
-        history.setStatus(status);
-        history.setChangeDate(OffsetDateTime.now());
-        history.setDescription(description);
-        licenseHistoryRepository.save(history);
-    }
-
-    private LicenseTicketResponse buildTicket(License license) {
-        return new LicenseTicketResponse(
-                license.getId(),
-                license.getCode(),
-                license.getProduct().getName(),
-                license.getType().getName(),
-                license.getUser() != null ? license.getUser().getId() : null,
-                license.getOwner().getId(),
-                license.isBlocked(),
-                license.getDeviceCount(),
-                license.getFirstActivationDate(),
-                license.getEndingDate(),
-                license.getDescription()
-        );
-    }
-
-    private String generateCode() {
-        return "LIC-" + UUID.randomUUID().toString().replace("-", "").toUpperCase();
-    }
     @Transactional
-    public LicenseTicketResponse renewLicense(RenewLicenseRequest request, Long userId) throws IllegalAccessException {
+    public TicketResponse renewLicense(RenewLicenseRequest request, Long userId) throws IllegalAccessException {
         License license = licenseRepository.findByCode(request.activationKey())
                 .orElseThrow(() -> new EntityNotFoundException("License not found"));
 
@@ -209,10 +169,15 @@ public class LicenseService {
 
         saveHistory(license, user, LicenseHistoryStatus.RENEWED, "License renewed");
 
-        return buildTicket(license);
+        Device device = deviceLicenseRepository.findFirstByLicense(license)
+                .map(DeviceLicense::getDevice)
+                .orElseThrow(() -> new EntityNotFoundException("Device not found"));
+
+        return buildTicketResponse(license, device);
     }
+
     @Transactional(readOnly = true)
-    public LicenseTicketResponse checkLicense(CheckLicenseRequest request, Long userId) {
+    public TicketResponse checkLicense(CheckLicenseRequest request, Long userId) {
         Device device = deviceRepository.findByMacAddress(request.deviceMac())
                 .orElseThrow(() -> new EntityNotFoundException("Device not found"));
 
@@ -223,6 +188,63 @@ public class LicenseService {
         License license = licenseRepository.findActiveByDeviceUserAndProduct(request.deviceMac(), userId, request.productId())
                 .orElseThrow(() -> new EntityNotFoundException("License not found"));
 
-        return buildTicket(license);
+        return buildTicketResponse(license, device);
+    }
+
+    private void createDeviceLicenseIfAbsent(License license, Device device, OffsetDateTime activationTime) {
+        boolean exists = deviceLicenseRepository.existsByLicenseAndDevice(license, device);
+        if (!exists) {
+            DeviceLicense deviceLicense = new DeviceLicense();
+            deviceLicense.setLicense(license);
+            deviceLicense.setDevice(device);
+            deviceLicense.setActivationDate(activationTime);
+            deviceLicenseRepository.save(deviceLicense);
+        }
+    }
+
+    private void saveHistory(License license, UserAccount user, LicenseHistoryStatus status, String description) {
+        LicenseHistory history = new LicenseHistory();
+        history.setLicense(license);
+        history.setUser(user);
+        history.setStatus(status);
+        history.setChangeDate(OffsetDateTime.now());
+        history.setDescription(description);
+        licenseHistoryRepository.save(history);
+    }
+
+    private TicketResponse buildTicketResponse(License license, Device device) {
+        Ticket ticket = new Ticket(
+                OffsetDateTime.now(),
+                TICKET_TTL_SECONDS,
+                license.getFirstActivationDate(),
+                license.getEndingDate(),
+                license.getUser() != null ? license.getUser().getId() : null,
+                device.getId(),
+                license.isBlocked()
+        );
+
+        return new TicketResponse(ticket, signTicket(ticket));
+    }
+
+    private String signTicket(Ticket ticket) {
+        try {
+            String raw = ticket.serverDate() + "|" +
+                    ticket.ttlSeconds() + "|" +
+                    ticket.licenseActivationDate() + "|" +
+                    ticket.licenseExpirationDate() + "|" +
+                    ticket.userId() + "|" +
+                    ticket.deviceId() + "|" +
+                    ticket.blocked();
+
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(raw.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to sign ticket");
+        }
+    }
+
+    private String generateCode() {
+        return "LIC-" + UUID.randomUUID().toString().replace("-", "").toUpperCase();
     }
 }

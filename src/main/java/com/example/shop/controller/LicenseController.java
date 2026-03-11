@@ -1,9 +1,6 @@
 package com.example.shop.controller;
 
-import com.example.shop.controller.dto.ActivateLicenseRequest;
-import com.example.shop.controller.dto.CheckLicenseRequest;
-import com.example.shop.controller.dto.LicenseTicketResponse;
-import com.example.shop.controller.dto.RenewLicenseRequest;
+import com.example.shop.controller.dto.*;
 import com.example.shop.model.UserAccount;
 import com.example.shop.repository.UserAccountRepository;
 import com.example.shop.service.LicenseService;
@@ -33,7 +30,7 @@ public class LicenseController {
             UserAccount user = userAccountRepository.findByUsername(username)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-            LicenseTicketResponse response = licenseService.activateLicense(request, user.getId());
+            TicketResponse response = licenseService.activateLicense(request, user.getId());
             return ResponseEntity.ok(response);
 
         } catch (EntityNotFoundException e) {
@@ -61,7 +58,7 @@ public class LicenseController {
             UserAccount user = userAccountRepository.findByUsername(username)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-            LicenseTicketResponse response = licenseService.renewLicense(request, user.getId());
+            TicketResponse response = licenseService.renewLicense(request, user.getId());
             return ResponseEntity.ok(response);
 
         } catch (EntityNotFoundException e) {
@@ -89,7 +86,7 @@ public class LicenseController {
             UserAccount user = userAccountRepository.findByUsername(username)
                     .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-            LicenseTicketResponse response = licenseService.checkLicense(request, user.getId());
+            TicketResponse response = licenseService.checkLicense(request, user.getId());
             return ResponseEntity.ok(response);
 
         } catch (EntityNotFoundException e) {
