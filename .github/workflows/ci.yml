@@ -53,7 +53,7 @@ jobs:
           java-version: "17"
           cache: maven
 
-      - name: Restore keystore from secret
+      - name: Restore SSL keystore from secret
         shell: bash
         run: |
           mkdir -p certs/private
@@ -66,8 +66,37 @@ jobs:
           echo "${{ secrets.SIGNATURE_KEYSTORE_B64 }}" | base64 --decode > signing.jks
           ls -la signing.jks
 
+      - name: Debug signing env
+        shell: bash
+        run: |
+          echo "SIGNATURE_KEYSTORE_PATH=$SIGNATURE_KEYSTORE_PATH"
+          echo "SIGNATURE_KEY_ALIAS=$SIGNATURE_KEY_ALIAS"
+          test -f signing.jks && echo "signing.jks exists" || echo "signing.jks missing"
+          test -f certs/private/ci-keystore.p12 && echo "ssl keystore exists" || echo "ssl keystore missing"
+
       - name: Build + Test
-        run: mvn -B clean test
+        run: mvn -B clean test -e
+
+      - name: Show surefire reports
+        if: always()
+        shell: bash
+        run: |
+          if [ -d target/surefire-reports ]; then
+            ls -la target/surefire-reports
+            for f in target/surefire-reports/*; do
+              echo "===== $f ====="
+              cat "$f" || true
+            done
+          else
+            echo "No surefire-reports directory found"
+          fi
+
+      - name: Upload surefire reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/**
 
       - name: Package
         run: mvn -B package -DskipTests
