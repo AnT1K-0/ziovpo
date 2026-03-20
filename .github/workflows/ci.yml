@@ -37,6 +37,11 @@ jobs:
       SSL_KEYSTORE_PATH: ${{ github.workspace }}/certs/private/ci-keystore.p12
       SSL_KEYSTORE_PASSWORD: ${{ secrets.SSL_KEYSTORE_PASSWORD }}
 
+      SIGNATURE_KEYSTORE_PATH: file:${{ github.workspace }}/signing.jks
+      SIGNATURE_KEYSTORE_PASSWORD: ${{ secrets.SIGNATURE_KEYSTORE_PASSWORD }}
+      SIGNATURE_KEY_PASSWORD: ${{ secrets.SIGNATURE_KEY_PASSWORD }}
+      SIGNATURE_KEY_ALIAS: ${{ secrets.SIGNATURE_KEY_ALIAS }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -54,6 +59,12 @@ jobs:
           mkdir -p certs/private
           echo "${{ secrets.SSL_KEYSTORE_B64 }}" | base64 --decode > certs/private/ci-keystore.p12
           ls -la certs/private
+
+      - name: Restore signing keystore from secret
+        shell: bash
+        run: |
+          echo "${{ secrets.SIGNATURE_KEYSTORE_B64 }}" | base64 --decode > signing.jks
+          ls -la signing.jks
 
       - name: Build + Test
         run: mvn -B clean test
