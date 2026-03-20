@@ -33,7 +33,6 @@ public class SigningService {
             byte[] signatureBytes = signature.sign();
             return Base64.getEncoder().encodeToString(signatureBytes);
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to sign payload", e);
-        }
+            throw new IllegalStateException("Failed to sign payload: " + e.getMessage(), e);        }
     }
 }
