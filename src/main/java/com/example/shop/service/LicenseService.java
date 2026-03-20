@@ -1,5 +1,6 @@
 package com.example.shop.service;
 
+import com.example.shop.signature.SigningService;
 import com.example.shop.controller.dto.*;
 import com.example.shop.model.*;
 import com.example.shop.repository.*;
@@ -7,11 +8,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.time.OffsetDateTime;
-import java.util.HexFormat;
 import java.util.UUID;
 
 @Service
@@ -19,7 +16,7 @@ import java.util.UUID;
 public class LicenseService {
 
     private static final long TICKET_TTL_SECONDS = 300L;
-
+    private final SigningService signingService;
     private final ProductRepository productRepository;
     private final LicenseTypeRepository licenseTypeRepository;
     private final LicenseRepository licenseRepository;
@@ -223,25 +220,7 @@ public class LicenseService {
                 license.isBlocked()
         );
 
-        return new TicketResponse(ticket, signTicket(ticket));
-    }
-
-    private String signTicket(Ticket ticket) {
-        try {
-            String raw = ticket.serverDate() + "|" +
-                    ticket.ttlSeconds() + "|" +
-                    ticket.licenseActivationDate() + "|" +
-                    ticket.licenseExpirationDate() + "|" +
-                    ticket.userId() + "|" +
-                    ticket.deviceId() + "|" +
-                    ticket.blocked();
-
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(raw.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hash);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to sign ticket");
-        }
+        return new TicketResponse(ticket, signingService.sign(ticket));
     }
 
     private String generateCode() {

@@ -105,3 +105,4 @@ certs/keystore/
 *.ext
 
 keystore.b64.txt
+signing-cert.pem
