@@ -1,0 +1,1443 @@
+﻿{
+    "info":  {
+                 "_postman_id":  "4be4fb8d-e130-435a-905d-4854165c484b",
+                 "name":  "RBPO Labs 2-3-4",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+                 "_exporter_id":  "49367670",
+                 "_collection_link":  "https://go.postman.co/collection/49367670-4be4fb8d-e130-435a-905d-4854165c484b?source=collection_link",
+                 "description":  "Repeatable Postman workflow for the current RBPO Labs 2-4 API. Covers auth, role checks, licenses, certificate retrieval, and malware signature lifecycle."
+             },
+    "item":  [
+                 {
+                     "item":  [
+                                  {
+                                      "name":  "01 Register admin candidate",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"username\": \"{{adminUsername}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/auth/register",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "auth",
+                                                                               "register"
+                                                                           ]
+                                                              },
+                                                      "description":  "Creates a fresh admin candidate for the current collection run. Promote this user to ROLE_ADMIN in the database before running the admin-only requests."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "const seed = Date.now().toString();",
+                                                                                    "pm.collectionVariables.set(\u0027runSeed\u0027, seed);",
+                                                                                    "pm.collectionVariables.set(\u0027adminUsername\u0027, \u0027admin.\u0027 + seed + \u0027@example.com\u0027);",
+                                                                                    "pm.collectionVariables.set(\u0027userUsername\u0027, \u0027user.\u0027 + seed + \u0027@example.com\u0027);",
+                                                                                    "[\u0027adminAccessToken\u0027,\u0027adminRefreshToken\u0027,\u0027userAccessToken\u0027,\u0027userRefreshToken\u0027,\u0027licenseId\u0027,\u0027licenseCode\u0027,\u0027signatureId\u0027,\u0027signatureSince\u0027,\u0027createdSignatureValue\u0027,\u0027updatedSignatureValue\u0027].forEach((key) =\u003e pm.collectionVariables.unset(key));"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "02 Register regular user",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"username\": \"{{userUsername}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/auth/register",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "auth",
+                                                                               "register"
+                                                                           ]
+                                                              },
+                                                      "description":  "Creates a fresh regular user for the current collection run."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "03 Login as admin",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"username\": \"{{adminUsername}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/auth/login",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "auth",
+                                                                               "login"
+                                                                           ]
+                                                              },
+                                                      "description":  "Logs in with the admin candidate credentials and stores admin JWT tokens."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.collectionVariables.set(\u0027adminAccessToken\u0027, json.accessToken);",
+                                                                                    "pm.collectionVariables.set(\u0027adminRefreshToken\u0027, json.refreshToken || \u0027\u0027);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "04 Check admin panel (ADMIN)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{adminAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/admin/panel",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "panel"
+                                                                           ]
+                                                              },
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  ""
+                                                               },
+                                                      "description":  "Verifies that the promoted admin user can access the admin-only endpoint."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027Admin username matches\u0027, function () {",
+                                                                                    "    pm.expect(json.username).to.eql(pm.collectionVariables.get(\u0027adminUsername\u0027));",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "05 Login as user",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"username\": \"{{userUsername}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/auth/login",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "auth",
+                                                                               "login"
+                                                                           ]
+                                                              },
+                                                      "description":  "Logs in as the regular user and stores user JWT tokens."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.collectionVariables.set(\u0027userAccessToken\u0027, json.accessToken);",
+                                                                                    "pm.collectionVariables.set(\u0027userRefreshToken\u0027, json.refreshToken || \u0027\u0027);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "06 Check current user (USER)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{userAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/user/me",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "user",
+                                                                               "me"
+                                                                           ]
+                                                              },
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  ""
+                                                               },
+                                                      "description":  "Verifies that the regular user token works on the USER-or-ADMIN endpoint."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027User username matches\u0027, function () {",
+                                                                                    "    pm.expect(json.username).to.eql(pm.collectionVariables.get(\u0027userUsername\u0027));",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "07 Refresh user token",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/auth/refresh",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "auth",
+                                                                               "refresh"
+                                                                           ]
+                                                              },
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"refreshToken\": \"{{userRefreshToken}}\"\n}"
+                                                               },
+                                                      "description":  "Refreshes the regular user JWT pair and replaces the stored user tokens."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "const refreshToken = pm.collectionVariables.get(\u0027userRefreshToken\u0027);",
+                                                                                    "if (!refreshToken) {",
+                                                                                    "    throw new Error(\u0027Run 05 Login as user first to capture userRefreshToken.\u0027);",
+                                                                                    "}"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.collectionVariables.set(\u0027userAccessToken\u0027, json.accessToken);",
+                                                                                    "pm.collectionVariables.set(\u0027userRefreshToken\u0027, json.refreshToken || pm.collectionVariables.get(\u0027userRefreshToken\u0027));"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "08 Create license",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{adminAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"productId\": {{productId}},\n  \"typeId\": {{typeId}},\n  \"ownerId\": {{ownerId}},\n  \"deviceCount\": 2,\n  \"description\": \"First test license\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/admin/licenses",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "licenses"
+                                                                           ]
+                                                              },
+                                                      "description":  "Creates a license as ADMIN. Set collection variable ownerId to the registered USER id first because the current API does not expose user id in auth responses."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "const ownerId = pm.collectionVariables.get(\u0027ownerId\u0027);",
+                                                                                    "if (!ownerId || ownerId === \u00270\u0027) {",
+                                                                                    "    throw new Error(\u0027Set collection variable ownerId to the registered USER id before creating a license.\u0027);",
+                                                                                    "}"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 201\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(201);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.collectionVariables.set(\u0027licenseId\u0027, String(json.id));",
+                                                                                    "pm.collectionVariables.set(\u0027licenseCode\u0027, json.code);"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "09 Activate license on device 1",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027Ticket exists\u0027, function () {",
+                                                                                    "    pm.expect(json.ticket).to.exist;",
+                                                                                    "});",
+                                                                                    "pm.test(\u0027Signature exists\u0027, function () {",
+                                                                                    "    pm.expect(json.signature).to.exist;",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{userAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"activationKey\": \"{{licenseCode}}\",\n  \"deviceName\": \"{{device1Name}}\",\n  \"deviceMac\": \"{{device1Mac}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/licenses/activate",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "licenses",
+                                                                               "activate"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "10 Activate license on device 2",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{userAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"activationKey\": \"{{licenseCode}}\",\n  \"deviceName\": \"{{device2Name}}\",\n  \"deviceMac\": \"{{device2Mac}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/licenses/activate",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "licenses",
+                                                                               "activate"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "11 Activate license on device 3 (expect 409)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 409\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(409);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{userAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"activationKey\": \"{{licenseCode}}\",\n  \"deviceName\": \"{{device3Name}}\",\n  \"deviceMac\": \"{{device3Mac}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/licenses/activate",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "licenses",
+                                                                               "activate"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "12 Check license (device 1)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027Ticket exists\u0027, function () {",
+                                                                                    "    pm.expect(json.ticket).to.exist;",
+                                                                                    "});",
+                                                                                    "pm.test(\u0027Signature looks like Base64\u0027, function () {",
+                                                                                    "    pm.expect(json.signature).to.match(/^[A-Za-z0-9+/=]+$/);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{userAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"deviceMac\": \"{{device1Mac}}\",\n  \"productId\": {{productId}}\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/licenses/check",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "licenses",
+                                                                               "check"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "13 Renew too early (expect 409)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 409\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(409);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{userAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"activationKey\": \"{{licenseCode}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/licenses/renew",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "licenses",
+                                                                               "renew"
+                                                                           ]
+                                                              }
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "14 Renew success (after manual DB ending_date tweak)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{userAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"activationKey\": \"{{licenseCode}}\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/licenses/renew",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "licenses",
+                                                                               "renew"
+                                                                           ]
+                                                              },
+                                                      "description":  "Before this request, run in psql: UPDATE license SET ending_date = NOW() + INTERVAL \u00273 days\u0027 WHERE code = \u0027{{licenseCode}}\u0027;"
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "15 Get signature certificate",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "pm.test(\u0027Response contains PEM certificate\u0027, function () {",
+                                                                                    "    pm.expect(pm.response.text()).to.include(\u0027BEGIN CERTIFICATE\u0027);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ],
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{adminAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/signature/certificate",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "signature",
+                                                                               "certificate"
+                                                                           ]
+                                                              },
+                                                      "description":  "Returns the PEM certificate used by the digital signature module."
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  }
+                              ],
+                     "name":  "Lab 2-3: Auth, Roles, Licenses, Digital Signature"
+                 },
+                 {
+                     "name":  "Lab 4: Malware Signatures",
+                     "item":  [
+                                  {
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{adminAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"threatName\": \"Trojan.Win32.TestSig\",\n  \"firstBytesHex\": \"4D5A9000\",\n  \"remainderHashHex\": \"A1B2C3D4E5F67890ABCDEF1234567890\",\n  \"remainderLength\": 128,\n  \"fileType\": \"exe\",\n  \"offsetStart\": 0,\n  \"offsetEnd\": 64\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/admin/signatures",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "signatures"
+                                                                           ]
+                                                              },
+                                                      "description":  "Creates a new malware signature as an admin and stores signatureId plus the initial digital signature for later comparisons."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "name":  "16 Create malware signature (ADMIN)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 201\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(201);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.collectionVariables.set(\u0027signatureId\u0027, json.id);",
+                                                                                    "pm.collectionVariables.set(\u0027createdSignatureValue\u0027, json.digitalSignatureBase64);",
+                                                                                    "pm.test(\u0027Signature status is ACTUAL\u0027, function () {",
+                                                                                    "    pm.expect(json.status).to.eql(\u0027ACTUAL\u0027);",
+                                                                                    "});",
+                                                                                    "pm.test(\u0027Digital signature exists\u0027, function () {",
+                                                                                    "    pm.expect(json.digitalSignatureBase64).to.be.a(\u0027string\u0027).and.not.empty;",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{userAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/signatures",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "signatures"
+                                                                           ]
+                                                              },
+                                                      "description":  "Reads the full signature export as a regular USER. The full export must contain only ACTUAL records."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "name":  "17 Get all malware signatures (USER)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027Created signature is present in full export\u0027, function () {",
+                                                                                    "    const ids = json.map(item =\u003e item.id);",
+                                                                                    "    pm.expect(ids).to.include(pm.collectionVariables.get(\u0027signatureId\u0027));",
+                                                                                    "});",
+                                                                                    "pm.test(\u0027Full export contains only ACTUAL signatures\u0027, function () {",
+                                                                                    "    pm.expect(json.every(item =\u003e item.status === \u0027ACTUAL\u0027)).to.eql(true);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{userAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"ids\": [\n    \"{{signatureId}}\"\n  ]\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/signatures/by-ids",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "signatures",
+                                                                               "by-ids"
+                                                                           ]
+                                                              },
+                                                      "description":  "Fetches selected signatures by UUID as a USER."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "name":  "18 Get signatures by ids (USER)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027Exactly one requested signature is returned\u0027, function () {",
+                                                                                    "    pm.expect(json.length).to.eql(1);",
+                                                                                    "    pm.expect(json[0].id).to.eql(pm.collectionVariables.get(\u0027signatureId\u0027));",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{adminAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"threatName\": \"Trojan.Win32.TestSig.Updated\",\n  \"firstBytesHex\": \"4D5A9000\",\n  \"remainderHashHex\": \"FFFFFFFFEEEEEEEEDDDDDDDDCCCCCCCC\",\n  \"remainderLength\": 256,\n  \"fileType\": \"exe\",\n  \"offsetStart\": 0,\n  \"offsetEnd\": 128\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/admin/signatures/{{signatureId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "signatures",
+                                                                               "{{signatureId}}"
+                                                                           ]
+                                                              },
+                                                      "description":  "Updates the signature and stores the recalculated digital signature. signatureSince is captured before the mutation for increment checks."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "name":  "19 Update malware signature (ADMIN)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.collectionVariables.set(\u0027signatureSince\u0027, new Date().toISOString());"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.collectionVariables.set(\u0027updatedSignatureValue\u0027, json.digitalSignatureBase64);",
+                                                                                    "pm.test(\u0027Status is ACTUAL\u0027, function () {",
+                                                                                    "    pm.expect(json.status).to.eql(\u0027ACTUAL\u0027);",
+                                                                                    "});",
+                                                                                    "pm.test(\u0027Digital signature was recalculated on update\u0027, function () {",
+                                                                                    "    pm.expect(json.digitalSignatureBase64).to.not.eql(pm.collectionVariables.get(\u0027createdSignatureValue\u0027));",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{adminAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/admin/signatures/{{signatureId}}/history",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "signatures",
+                                                                               "{{signatureId}}",
+                                                                               "history"
+                                                                           ]
+                                                              },
+                                                      "description":  "Returns stored previous versions of the signature after the first update."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "name":  "20 Get signature history after update (ADMIN)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027History contains the pre-update version\u0027, function () {",
+                                                                                    "    pm.expect(json.length).to.be.at.least(1);",
+                                                                                    "    pm.expect(json[0].digitalSignatureBase64).to.eql(pm.collectionVariables.get(\u0027createdSignatureValue\u0027));",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{adminAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/admin/signatures/{{signatureId}}/audit",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "signatures",
+                                                                               "{{signatureId}}",
+                                                                               "audit"
+                                                                           ]
+                                                              },
+                                                      "description":  "Returns the audit trail after the update. The newest entry must describe the update and list changed fields."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "name":  "21 Get signature audit after update (ADMIN)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027Audit contains create and update events\u0027, function () {",
+                                                                                    "    pm.expect(json.length).to.be.at.least(2);",
+                                                                                    "    pm.expect(json[0].description).to.eql(\u0027Signature updated\u0027);",
+                                                                                    "    pm.expect(json[1].description).to.eql(\u0027Signature created\u0027);",
+                                                                                    "});",
+                                                                                    "pm.test(\u0027fieldsChanged lists changed fields\u0027, function () {",
+                                                                                    "    pm.expect(json[0].fieldsChanged).to.include(\u0027threatName\u0027);",
+                                                                                    "    pm.expect(json[0].fieldsChanged).to.include(\u0027remainderHashHex\u0027);",
+                                                                                    "    pm.expect(json[0].fieldsChanged).to.include(\u0027remainderLength\u0027);",
+                                                                                    "    pm.expect(json[0].fieldsChanged).to.include(\u0027offsetEnd\u0027);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{adminAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/admin/signatures/{{signatureId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "signatures",
+                                                                               "{{signatureId}}"
+                                                                           ]
+                                                              },
+                                                      "description":  "Performs logical deletion. The record stays in the main table with status DELETED and must appear in increment responses."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "name":  "22 Delete malware signature logically (ADMIN)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.collectionVariables.set(\u0027signatureSince\u0027, new Date().toISOString());"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 204\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(204);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{userAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/signatures",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "signatures"
+                                                                           ]
+                                                              },
+                                                      "description":  "Verifies that logically deleted signatures are excluded from the full export."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "name":  "23 Get all malware signatures after delete (USER)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027Deleted signature is absent from full export\u0027, function () {",
+                                                                                    "    const ids = json.map(item =\u003e item.id);",
+                                                                                    "    pm.expect(ids).to.not.include(pm.collectionVariables.get(\u0027signatureId\u0027));",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{userAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/signatures/increment?since={{signatureSince}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "signatures",
+                                                                               "increment"
+                                                                           ],
+                                                                  "query":  [
+                                                                                {
+                                                                                    "key":  "since",
+                                                                                    "value":  "{{signatureSince}}"
+                                                                                }
+                                                                            ]
+                                                              },
+                                                      "description":  "Verifies increment synchronization semantics: updatedAt \u003e since must include the DELETED record."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "name":  "24 Get signatures increment after delete (USER)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "const target = json.find(item =\u003e item.id === pm.collectionVariables.get(\u0027signatureId\u0027));",
+                                                                                    "pm.test(\u0027Increment contains the deleted signature\u0027, function () {",
+                                                                                    "    pm.expect(target).to.exist;",
+                                                                                    "    pm.expect(target.status).to.eql(\u0027DELETED\u0027);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{adminAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/admin/signatures/{{signatureId}}/history",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "signatures",
+                                                                               "{{signatureId}}",
+                                                                               "history"
+                                                                           ]
+                                                              },
+                                                      "description":  "After delete, history must still return the previous ACTUAL versions of the signature."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "name":  "25 Get signature history after delete (ADMIN)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027History contains update and delete snapshots\u0027, function () {",
+                                                                                    "    pm.expect(json.length).to.be.at.least(2);",
+                                                                                    "    pm.expect(json[0].digitalSignatureBase64).to.eql(pm.collectionVariables.get(\u0027updatedSignatureValue\u0027));",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{adminAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/admin/signatures/{{signatureId}}/audit",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "signatures",
+                                                                               "{{signatureId}}",
+                                                                               "audit"
+                                                                           ]
+                                                              },
+                                                      "description":  "After delete, audit must include the delete event followed by the earlier update and create events."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "name":  "26 Get signature audit after delete (ADMIN)",
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.test(\u0027Audit contains create, update, and delete events\u0027, function () {",
+                                                                                    "    pm.expect(json.length).to.be.at.least(3);",
+                                                                                    "    pm.expect(json[0].description).to.eql(\u0027Signature deleted logically\u0027);",
+                                                                                    "    pm.expect(json[1].description).to.eql(\u0027Signature updated\u0027);",
+                                                                                    "    pm.expect(json[2].description).to.eql(\u0027Signature created\u0027);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
+                 }
+             ],
+    "variable":  [
+                     {
+                         "key":  "baseUrl",
+                         "value":  "https://localhost:8443"
+                     },
+                     {
+                         "key":  "adminUsername",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "adminPassword",
+                         "value":  "Pa$$word!1"
+                     },
+                     {
+                         "key":  "adminAccessToken",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "adminRefreshToken",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "userUsername",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "userPassword",
+                         "value":  "Pa$$word!1"
+                     },
+                     {
+                         "key":  "userAccessToken",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "userRefreshToken",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "ownerId",
+                         "value":  "0"
+                     },
+                     {
+                         "key":  "productId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "typeId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "licenseId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "licenseCode",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "device1Name",
+                         "value":  "PC-1"
+                     },
+                     {
+                         "key":  "device1Mac",
+                         "value":  "AA-BB-CC-DD-EE-01"
+                     },
+                     {
+                         "key":  "device2Name",
+                         "value":  "PC-2"
+                     },
+                     {
+                         "key":  "device2Mac",
+                         "value":  "AA-BB-CC-DD-EE-02"
+                     },
+                     {
+                         "key":  "device3Name",
+                         "value":  "PC-3"
+                     },
+                     {
+                         "key":  "device3Mac",
+                         "value":  "AA-BB-CC-DD-EE-03"
+                     },
+                     {
+                         "key":  "signatureId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "signatureSince",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "runSeed",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "createdSignatureValue",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "updatedSignatureValue",
+                         "value":  ""
+                     }
+                 ]
+}

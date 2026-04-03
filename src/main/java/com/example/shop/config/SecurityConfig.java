@@ -26,10 +26,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/api/user/me").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/admin/panel").hasRole("ADMIN")
+
                         .requestMatchers("/api/admin/licenses/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/signatures/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/signatures").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/signatures/increment").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/signatures/by-ids").hasAnyRole("USER", "ADMIN")
+
                         .requestMatchers("/api/licenses/**").hasAnyRole("USER", "ADMIN")
+
                         .anyRequest().authenticated()
                 );
 

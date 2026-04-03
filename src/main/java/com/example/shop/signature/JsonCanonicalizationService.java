@@ -1,5 +1,4 @@
 package com.example.shop.signature;
-
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -10,9 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 public class JsonCanonicalizationService {
-
     private final ObjectMapper objectMapper;
-
     public JsonCanonicalizationService() {
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());

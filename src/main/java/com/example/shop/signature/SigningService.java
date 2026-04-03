@@ -25,11 +25,9 @@ public class SigningService {
         try {
             byte[] canonicalBytes = canonicalizationService.canonicalize(payload);
             PrivateKey privateKey = keyProvider.getSigningKey();
-
             Signature signature = Signature.getInstance(properties.getAlgorithm());
             signature.initSign(privateKey);
             signature.update(canonicalBytes);
-
             byte[] signatureBytes = signature.sign();
             return Base64.getEncoder().encodeToString(signatureBytes);
         } catch (Exception e) {
