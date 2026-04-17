@@ -65,6 +65,9 @@ jobs:
         run: |
           echo "${{ secrets.SIGNATURE_KEYSTORE_B64 }}" | base64 --decode > signing.jks
           ls -la signing.jks
+          mkdir -p src/test/resources
+          cp signing.jks src/test/resources/signing.jks
+          ls -la src/test/resources/signing.jks
 
       - name: Debug signing env
         shell: bash
