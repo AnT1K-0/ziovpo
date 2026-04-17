@@ -1,16 +1,20 @@
 package com.example.shop.controller;
 
 import com.example.shop.controller.dto.CreateSignatureRequest;
+import com.example.shop.controller.dto.SignatureIdsRequest;
 import com.example.shop.controller.dto.UpdateSignatureRequest;
 import com.example.shop.model.UserAccount;
 import com.example.shop.repository.UserAccountRepository;
 import com.example.shop.service.MalwareSignatureService;
+import com.example.shop.service.SignatureFileManagementService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 import java.util.UUID;
@@ -21,6 +25,7 @@ import java.util.UUID;
 public class AdminSignatureController {
 
     private final MalwareSignatureService malwareSignatureService;
+    private final SignatureFileManagementService signatureFileManagementService;
     private final UserAccountRepository userAccountRepository;
 
     @PostMapping
@@ -117,6 +122,48 @@ public class AdminSignatureController {
     public ResponseEntity<?> getAudit(@PathVariable UUID id) {
         try {
             return ResponseEntity.ok(malwareSignatureService.getAudit(id));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    Map.of(
+                            "error", "Internal error",
+                            "details", e.getMessage()
+                    )
+            );
+        }
+    }
+
+    @PostMapping(value = "/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadAndCreateFromFile(@RequestPart("file") MultipartFile file,
+                                                     @RequestParam(value = "threatName", required = false) String threatName,
+                                                     Authentication authentication) {
+        try {
+            String username = authentication.getName();
+
+            UserAccount admin = userAccountRepository.findByUsername(username)
+                    .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
+
+            return ResponseEntity.status(201)
+                    .body(signatureFileManagementService.uploadAndCreateSignature(file, threatName, admin.getUsername()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(
+                    Map.of(
+                            "error", "Internal error",
+                            "details", e.getMessage()
+                    )
+            );
+        }
+    }
+
+    @PostMapping("/files/presigned-urls")
+    public ResponseEntity<?> getFileUrls(@Valid @RequestBody SignatureIdsRequest request) {
+        try {
+            return ResponseEntity.ok(signatureFileManagementService.getPresignedUrls(request.ids()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(
                     Map.of(

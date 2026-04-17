@@ -1336,6 +1336,214 @@
                                                 ]
                                   }
                               ]
+                 },
+                 {
+                     "name":  "Lab 6: Signature File Management",
+                     "item":  [
+                                  {
+                                      "name":  "30 Upload signature from file (ADMIN)",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{adminAccessToken}}"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "formdata",
+                                                                   "formdata":  [
+                                                                                    {
+                                                                                        "key":  "file",
+                                                                                        "type":  "file",
+                                                                                        "src":  "{{sampleSignatureFilePath}}"
+                                                                                    },
+                                                                                    {
+                                                                                        "key":  "threatName",
+                                                                                        "type":  "text",
+                                                                                        "value":  "{{fileUploadThreatName}}"
+                                                                                    }
+                                                                                ]
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/admin/signatures/files",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "signatures",
+                                                                               "files"
+                                                                           ]
+                                                              },
+                                                      "description":  "Uploads one source file, calculates signature fields on server side, saves original file to MinIO and returns created signature."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "const filePath = pm.collectionVariables.get(\u0027sampleSignatureFilePath\u0027) || \u0027\u0027;",
+                                                                                    "if (!filePath) {",
+                                                                                    "    throw new Error(\u0027Set collection variable sampleSignatureFilePath to a local file path before running this request.\u0027);",
+                                                                                    "}"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 201\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(201);",
+                                                                                    "});",
+                                                                                    "const json = pm.response.json();",
+                                                                                    "pm.collectionVariables.set(\u0027fileSignatureId\u0027, json.id || \u0027\u0027);",
+                                                                                    "pm.test(\u0027Response has signature id\u0027, function () {",
+                                                                                    "    pm.expect(json.id).to.be.a(\u0027string\u0027).and.not.empty;",
+                                                                                    "});",
+                                                                                    "pm.test(\u0027Calculated fields are present\u0027, function () {",
+                                                                                    "    pm.expect(json.firstBytesHex).to.match(/^[0-9A-Fa-f]+$/);",
+                                                                                    "    pm.expect(json.remainderHashHex).to.match(/^[0-9A-Fa-f]{64}$/);",
+                                                                                    "    pm.expect(json.digitalSignatureBase64).to.be.a(\u0027string\u0027).and.not.empty;",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "31 Get pre-signed URLs by signature ids (ADMIN)",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{adminAccessToken}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"ids\": [\"{{fileSignatureId}}\"]\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/admin/signatures/files/presigned-urls",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "signatures",
+                                                                               "files",
+                                                                               "presigned-urls"
+                                                                           ]
+                                                              },
+                                                      "description":  "Returns list of pre-signed GET URLs for source files linked to provided signature IDs."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "event":  [
+                                                    {
+                                                        "listen":  "prerequest",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "const id = pm.collectionVariables.get(\u0027fileSignatureId\u0027) || \u0027\u0027;",
+                                                                                    "if (!id) {",
+                                                                                    "    throw new Error(\u0027Run request 30 first to set fileSignatureId.\u0027);",
+                                                                                    "}"
+                                                                                ]
+                                                                   }
+                                                    },
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 200\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(200);",
+                                                                                    "});",
+                                                                                    "const list = pm.response.json();",
+                                                                                    "pm.test(\u0027Response is non-empty array\u0027, function () {",
+                                                                                    "    pm.expect(Array.isArray(list)).to.equal(true);",
+                                                                                    "    pm.expect(list.length).to.be.greaterThan(0);",
+                                                                                    "});",
+                                                                                    "const requestedId = pm.collectionVariables.get(\u0027fileSignatureId\u0027);",
+                                                                                    "const item = list.find(x =\u003e x.signatureId === requestedId) || list[0];",
+                                                                                    "pm.collectionVariables.set(\u0027filePresignedUrl\u0027, item \u0026\u0026 item.presignedUrl ? item.presignedUrl : \u0027\u0027);",
+                                                                                    "pm.test(\u0027Pre-signed URL fields are present\u0027, function () {",
+                                                                                    "    pm.expect(item.signatureId).to.be.a(\u0027string\u0027).and.not.empty;",
+                                                                                    "    pm.expect(item.presignedUrl).to.be.a(\u0027string\u0027).and.include(\u0027http\u0027);",
+                                                                                    "    pm.expect(item.expiresInSeconds).to.be.a(\u0027number\u0027);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "name":  "32 Get pre-signed URLs forbidden for USER",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Authorization",
+                                                                         "value":  "Bearer {{userAccessToken}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"ids\": [\"{{fileSignatureId}}\"]\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/api/admin/signatures/files/presigned-urls",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "api",
+                                                                               "admin",
+                                                                               "signatures",
+                                                                               "files",
+                                                                               "presigned-urls"
+                                                                           ]
+                                                              },
+                                                      "description":  "Checks role restriction: USER token must be denied on admin file API."
+                                                  },
+                                      "response":  [
+
+                                                   ],
+                                      "event":  [
+                                                    {
+                                                        "listen":  "test",
+                                                        "script":  {
+                                                                       "type":  "text/javascript",
+                                                                       "exec":  [
+                                                                                    "pm.test(\u0027Status is 403\u0027, function () {",
+                                                                                    "    pm.response.to.have.status(403);",
+                                                                                    "});"
+                                                                                ]
+                                                                   }
+                                                    }
+                                                ]
+                                  }
+                              ]
                  }
              ],
     "variable":  [
@@ -1437,6 +1645,22 @@
                      },
                      {
                          "key":  "updatedSignatureValue",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "sampleSignatureFilePath",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "fileUploadThreatName",
+                         "value":  "File.Upload.Sample"
+                     },
+                     {
+                         "key":  "fileSignatureId",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "filePresignedUrl",
                          "value":  ""
                      }
                  ]

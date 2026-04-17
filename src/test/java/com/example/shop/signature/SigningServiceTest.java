@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.security.Signature;
 import java.security.cert.X509Certificate;
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Base64;
 
@@ -45,6 +46,20 @@ class SigningServiceTest {
         Signature verifier = Signature.getInstance("SHA256withRSA");
         verifier.initVerify(certificate.getPublicKey());
         verifier.update(canonicalBytes);
+
+        assertTrue(verifier.verify(signatureBytes));
+    }
+
+    @Test
+    void shouldSignAndVerifyRawBytes() throws Exception {
+        byte[] payload = "manifest-payload".getBytes(StandardCharsets.UTF_8);
+
+        byte[] signatureBytes = signingService.signBytes(payload);
+        X509Certificate certificate = keyProvider.getCertificate();
+
+        Signature verifier = Signature.getInstance("SHA256withRSA");
+        verifier.initVerify(certificate.getPublicKey());
+        verifier.update(payload);
 
         assertTrue(verifier.verify(signatureBytes));
     }
