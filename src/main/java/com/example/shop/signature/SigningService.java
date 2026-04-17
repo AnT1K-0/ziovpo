@@ -24,13 +24,26 @@ public class SigningService {
     public String sign(Object payload) {
         try {
             byte[] canonicalBytes = canonicalizationService.canonicalize(payload);
+            byte[] signatureBytes = signBytes(canonicalBytes);
+            return Base64.getEncoder().encodeToString(signatureBytes);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to sign payload: " + e.getMessage(), e);
+        }
+    }
+
+    public byte[] signBytes(byte[] payloadBytes) {
+        if (payloadBytes == null) {
+            throw new IllegalArgumentException("payloadBytes must not be null");
+        }
+
+        try {
             PrivateKey privateKey = keyProvider.getSigningKey();
             Signature signature = Signature.getInstance(properties.getAlgorithm());
             signature.initSign(privateKey);
-            signature.update(canonicalBytes);
-            byte[] signatureBytes = signature.sign();
-            return Base64.getEncoder().encodeToString(signatureBytes);
+            signature.update(payloadBytes);
+            return signature.sign();
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to sign payload: " + e.getMessage(), e);        }
+            throw new IllegalStateException("Failed to sign bytes: " + e.getMessage(), e);
+        }
     }
 }
